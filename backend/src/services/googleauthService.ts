@@ -17,7 +17,7 @@ export const googleOAuthLogin = async (token: string) => {
 
     let user = await getUserByEmail(payload.email);
     if (!user) {
-      user = await createUser(payload.name || '', payload.email, 'google-oauth');
+      user = await createUser(payload.name || '', payload.email, null, null); 
     }
 
     return user;

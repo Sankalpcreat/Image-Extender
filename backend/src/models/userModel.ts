@@ -1,6 +1,6 @@
 import pool from '../config/database';
 
-export const createUser = async (username: string, email: string, password: string, verificationCode: string) => {
+export const createUser = async (username: string, email: string, password: string | null, verificationCode: string | null) => {
   const result = await pool.query(
     'INSERT INTO users (username, email, password, verification_code, is_verified) VALUES ($1, $2, $3, $4, $5) RETURNING *',
     [username, email, password, verificationCode, false] // `false` means user is not verified yet
