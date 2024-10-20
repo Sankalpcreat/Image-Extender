@@ -2,17 +2,33 @@ import { useState } from 'react'
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
+import axios from 'axios'
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [email,setEmail]=useState<string>('');
+  const [password,setPassword]=useState<string>('');
 
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault()
     setIsLoading(true)
-
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 3000)
+      try {
+        const response=await axios.post('/api/auth/login',{email,password});
+        console.log(response.data);
+      } catch (error) {
+        console.error('Login Failed',error);
+      } finally{
+        setIsLoading(false)
+      }
+  }
+  const handleGoogleLogin=async ()=>{
+    try {
+      const response = await axios.get('/api/auth/google'); // Adjust as needed
+      // Handle Google login response
+      console.log(response.data);
+    } catch (error) {
+      console.error('Google login Failed',error)
+    }
   }
 
   return (
@@ -40,6 +56,8 @@ export default function LoginPage() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                value={email}
+                onChange={(e)=>setEmail(e.target.value)}
                 placeholder="name@example.com"
                 type="email"
                 autoCapitalize="none"
@@ -52,6 +70,8 @@ export default function LoginPage() {
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
                 type="password"
                 autoCapitalize="none"
@@ -77,14 +97,20 @@ export default function LoginPage() {
               </span>
             </div>
           </div>
-          <Button variant="outline" type="button" className="w-full" disabled={isLoading}>
-            {isLoading ? (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Icons.google className="mr-2 h-4 w-4" />
-            )}{" "}
-            Google
-          </Button>
+                      <Button
+              variant="outline"
+              type="button"
+              className="w-full"
+              onClick={handleGoogleLogin} // Add the onClick handler
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Icons.google className="mr-2 h-4 w-4" />
+              )}
+              Google
+            </Button>
         </div>
       </div>
     </div>
