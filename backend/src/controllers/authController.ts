@@ -1,23 +1,34 @@
-
+import { googleOAuthLogin } from '../services/googleAuthService';
 import { Request, Response } from 'express';
-import { registerUser, verifyUser } from '../services/authService';
+import { manualLogin, sendVerificationCode } from '../services/authService';
 
-export const register = async (req: Request, res: Response) => {
-  const { username, email, password } = req.body;
+export const googleLogin=async(req:Request,res:Response)=>{
+  const {token}=req.body;
   try {
-    const user = await registerUser(username, email, password);
-    return res.status(201).json({ message: 'User registered. Check your email for verification.' });
+    const user=await googleOAuthLogin(token);
+    res.json({user})
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    res.status(500).json({error:'Google OAuth login failed'})
   }
 };
 
-export const verifyEmail = async (req: Request, res: Response) => {
-  const { code } = req.params;
+
+export const manualLoginController=async(req:Request,res:Response)=>{
+  const {email,password}=req.body;
   try {
-    const user = await verifyUser(code);
-    return res.status(200).json({ message: 'Email verified successfully!', user });
+    const user=await manualLogin(email,password);
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    res.status(500).json({error:'Login Failed'})
+  }
+};
+
+
+export const verifyEmail = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  try {
+    const verificationCode = await sendVerificationCode(email);
+    res.json({ message: 'Verification code sent', verificationCode });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to send verification code' });
   }
 };

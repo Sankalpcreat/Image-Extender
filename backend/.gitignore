@@ -71,7 +71,7 @@ yarn-error.log*
 
 # Optional npm cache directory
 .npm
-env.ts
+
 # Optional eslint cache
 .eslintcache
 
