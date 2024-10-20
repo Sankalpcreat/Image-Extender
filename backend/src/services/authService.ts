@@ -1,22 +1,35 @@
-import Resend from 'resend';
-import { createUser, getUserByEmail } from '../models/userModel';
-
-const resend = new Resend(process.env.RESEND_API_KEY!);
+import bcrypt from 'bcrypt';
+import { getUserByEmail, createUser } from '../models/userModel';
+import { sendVerificationEmail } from './resendService';
+import { v4 as uuidv4 } from 'uuid'; 
 
 export const registerUser = async (username: string, email: string, password: string) => {
-  const user = await createUser(username, email, password);
-  await sendVerificationEmail(user.email, user.verification_code);
+  const userExists = await getUserByEmail(email);
+  if (userExists) {
+    throw new Error('User already exists');
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const verificationCode = uuidv4(); // Generate verification code
+
+  const user = await createUser(username, email, hashedPassword, verificationCode);
+
+  // Send verification email
+  await sendVerificationEmail(email, verificationCode);
+
   return user;
 };
 
-const sendVerificationEmail = async (email: string, code: string) => {
-  const verificationLink = `${process.env.FRONTEND_URL}/verify?code=${code}`;
+export const verifyUserCode = async (email: string, code: string) => {
+  const user = await getUserByEmail(email);
+  if (!user) throw new Error('User not found');
 
-  await resend.sendEmail({
-    from: 'your-email@example.com',
-    to: email,
-    subject: 'Verify your email',
-    html: `<p>Please click the link below to verify your email:</p>
-           <a href="${verificationLink}">Verify Email</a>`,
-  });
+  if (user.verification_code !== code) {
+    throw new Error('Invalid verification code');
+  }
+
+  // Update user status to verified
+  await updateVerificationStatus(email);
+
+  return 'User verified successfully';
 };

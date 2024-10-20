@@ -1,41 +1,19 @@
-// src/models/userModel.ts
 import pool from '../config/database';
-import { v4 as uuidv4 } from 'uuid';
 
-export const createUser = async (username: string, email: string, password: string) => {
-  const verificationCode = uuidv4(); 
+export const createUser = async (username: string, email: string, password: string, verificationCode: string) => {
   const result = await pool.query(
-    'INSERT INTO users (username, email, password, verification_code) VALUES ($1, $2, $3, $4) RETURNING *',
-    [username, email, password, verificationCode]
+    'INSERT INTO users (username, email, password, verification_code, is_verified) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+    [username, email, password, verificationCode, false] // `false` means user is not verified yet
   );
   return result.rows[0];
 };
-
 
 export const getUserByEmail = async (email: string) => {
-  const result = await pool.query(
-    'SELECT * FROM users WHERE email = $1',
-    [email]
-  );
+  const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
   return result.rows[0];
 };
 
-export const getUserByVerificationCode = async (code: string) => {
-  const result = await pool.query(
-    'SELECT * FROM users WHERE verification_code = $1',
-    [code]
-  );
+export const updateVerificationStatus = async (email: string) => {
+  const result = await pool.query('UPDATE users SET is_verified = true WHERE email = $1 RETURNING *', [email]);
   return result.rows[0];
-};
-
-export const verifyUser = async (code: string) => {
-  const user = await getUserByVerificationCode(code);
-  if (!user) throw new Error('Invalid verification code');
-
- 
-  await pool.query(
-    'UPDATE users SET is_verified = true WHERE verification_code = $1',
-    [code]
-  );
-  return user;
 };

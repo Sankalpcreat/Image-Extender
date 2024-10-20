@@ -1,13 +1,12 @@
 import axios from 'axios';
 
-export const extendImage = async (imageBuffer: Buffer) => {
+export const extendImageBackground = async (imageBuffer: Buffer) => {
   try {
-  
     const response = await axios.post(
       'https://api.openai.com/v1/images/edits',
       {
-        prompt: 'Extend background of  this image',
         image: imageBuffer.toString('base64'),
+        prompt: 'Extend the background of this image',
         size: '1024x1024',
       },
       {
@@ -18,9 +17,8 @@ export const extendImage = async (imageBuffer: Buffer) => {
       }
     );
 
-   
     return response.data;
   } catch (error) {
-    throw new Error('Failed to extend the image using OpenAI API');
+    throw new Error('Failed to extend the image using OpenAI');
   }
 };
