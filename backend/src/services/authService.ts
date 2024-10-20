@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { getUserByEmail, createUser } from '../models/userModel';
+import { getUserByEmail, createUser, updateVerificationStatus } from '../models/userModel'; // Import the function here
 import { sendVerificationEmail } from './resendService';
 import { v4 as uuidv4 } from 'uuid'; 
 
@@ -29,7 +29,7 @@ export const verifyUserCode = async (email: string, code: string) => {
   }
 
   // Update user status to verified
-  await updateVerificationStatus(email);
+  await updateVerificationStatus(email); // Ensure this function is defined and imported
 
   return 'User verified successfully';
 };
