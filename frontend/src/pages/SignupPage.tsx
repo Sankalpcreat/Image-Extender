@@ -23,8 +23,8 @@ export default function LoginPage() {
   }
   const handleGoogleLogin=async ()=>{
     try {
-      const response = await axios.get('/api/auth/google'); // Adjust as needed
-      // Handle Google login response
+      const response = await axios.get('/api/auth/google'); 
+     
       console.log(response.data);
     } catch (error) {
       console.error('Google login Failed',error)
