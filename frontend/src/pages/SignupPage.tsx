@@ -1,122 +1,122 @@
-import { useState } from 'react'
-import { Button } from "../components/ui/button"
-import { Input } from "../components/ui/input"
-import { Label } from "../components/ui/label"
-import axios from 'axios'
+import { useState } from 'react';
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [email,setEmail]=useState<string>('');
-  const [password,setPassword]=useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const navigate=useNavigate();
 
+  // Handle manual login form submission
   async function onSubmit(event: React.SyntheticEvent) {
-    event.preventDefault()
-    setIsLoading(true)
-      try {
-        const response=await axios.post('/api/auth/login',{email,password});
-        console.log(response.data);
-      } catch (error) {
-        console.error('Login Failed',error);
-      } finally{
-        setIsLoading(false)
-      }
-  }
-  const handleGoogleLogin=async ()=>{
+    event.preventDefault();
+    setIsLoading(true);
     try {
-      const response = await axios.get('/api/auth/google'); 
-     
+      const response = await axios.post('/api/auth/login', { email, password });
       console.log(response.data);
+      navigate('/image-extender')
     } catch (error) {
-      console.error('Google login Failed',error)
+      console.error('Login Failed', error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
+  // Handle Google login success
+  const handleGoogleLoginSuccess = async (tokenResponse: any) => {
+    try {
+      const response = await axios.post('/api/auth/google-login', {
+        token: tokenResponse.credential,
+      });
+      console.log('Google login successful:', response.data);
+      navigate('/image-extender');  
+    } catch (error) {
+      console.error('Google login failed', error);
+    }
+  };
+
   return (
-    <div className="flex h-screen">
-      <div className="relative hidden w-1/2 lg:block">
-        <img
-          src="/image.jpg"
-          alt="Login page illustration"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black opacity-50" />
-      </div>
-      <div className="flex w-full items-center justify-center lg:w-1/2">
-        <div className="mx-auto w-full max-w-sm space-y-6 px-4 sm:px-0">
-          <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Login to your account
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Enter your email below to login to your account
-            </p>
+<GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+
+      <div className="flex h-screen">
+        <div className="relative hidden w-1/2 lg:block">
+          <img
+            src="/image.jpg"
+            alt="Login page illustration"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black opacity-50" />
+        </div>
+        <div className="flex w-full items-center justify-center lg:w-1/2">
+          <div className="mx-auto w-full max-w-sm space-y-6 px-4 sm:px-0">
+            <div className="flex flex-col space-y-2 text-center">
+              <h1 className="text-2xl font-semibold tracking-tight">Login to your account</h1>
+              <p className="text-sm text-muted-foreground">Enter your email below to login to your account</p>
+            </div>
+
+            {/* Manual login form */}
+            <form onSubmit={onSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  type="email"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  autoCorrect="off"
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  type="password"
+                  autoCapitalize="none"
+                  autoComplete="current-password"
+                  autoCorrect="off"
+                  disabled={isLoading}
+                />
+              </div>
+              <Button className="w-full" disabled={isLoading}>
+                {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                Sign In
+              </Button>
+            </form>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+
+            {/* Google login button */}
+            <GoogleLogin
+              onSuccess={handleGoogleLoginSuccess}
+              onError={() => console.log('Google login failed')}
+            />
           </div>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                value={email}
-                onChange={(e)=>setEmail(e.target.value)}
-                placeholder="name@example.com"
-                type="email"
-                autoCapitalize="none"
-                autoComplete="email"
-                autoCorrect="off"
-                disabled={isLoading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                type="password"
-                autoCapitalize="none"
-                autoComplete="current-password"
-                autoCorrect="off"
-                disabled={isLoading}
-              />
-            </div>
-            <Button className="w-full" disabled={isLoading}>
-              {isLoading && (
-                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Sign In
-            </Button>
-          </form>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-                      <Button
-              variant="outline"
-              type="button"
-              className="w-full"
-              onClick={handleGoogleLogin} // Add the onClick handler
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Icons.google className="mr-2 h-4 w-4" />
-              )}
-              Google
-            </Button>
         </div>
       </div>
-    </div>
-  )
+    </GoogleOAuthProvider>
+  );
 }
 
+// Spinner and Google Icons
 const Icons = {
   spinner: (props: React.SVGProps<SVGSVGElement>) => (
     <svg
@@ -142,4 +142,4 @@ const Icons = {
       />
     </svg>
   ),
-}
+};

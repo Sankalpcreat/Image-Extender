@@ -4,7 +4,7 @@ import { googleLogin, register, verifyEmail } from '../controllers/authControlle
 
 const router = express.Router();
 
-router.post('/google-login', googleLogin);
+router.get('/google-login', googleLogin);
 router.post('/manual-login', register);
 router.post('/verify-email', verifyEmail);
 
